@@ -1,0 +1,187 @@
+# Model settings. Every random step uses `seed` (plan Section 12).
+seed: 20261012
+
+sample:
+  monthly_start: "2004-01-31"
+  quarterly_start: "2004-06-30"   # 2004Q2
+
+# ---------------------------------------------------------------- Layer 1
+var_monthly:                       # Model A (the main engine)
+  id: A
+  # Cholesky order; oil is ALWAYS first.
+  variables: [oil, ip, cpi, repo, inr]
+  # panel column behind each VAR variable
+  columns: {oil: oil, ip: ip, cpi: cpi_mom_sa, repo: d_repo, inr: inr}
+  differenced: [oil, ip, cpi, repo, inr]        # every variable enters as a change -> cumulate for levels
+  exog: [d_fedfunds, vix, covid, demonetisation]
+  maxlags: 12
+  ic: bic
+  whiteness_alpha: 0.05
+  whiteness_nlags: 12
+  horizon: 24
+  reps: 1000
+  rolling_reps: 200
+  order_check_variables: [oil, inr, ip, cpi, repo]   # "inr second" robustness
+  unit_roots: {adf_alpha: 0.05, kpss_alpha: 0.05}
+
+var_quarterly:                     # Model B
+  id: B
+  variables: [oil, gdp_growth, cab_gdp, cpi, repo, inr]
+  columns: {oil: oil, gdp_growth: gdp_growth, cab_gdp: cab_gdp, cpi: cpi_yoy, repo: repo, inr: inr}
+  differenced: [oil, inr]
+  exog: [covid_q]
+  maxlags: 2
+  fixed_lags: 2
+  horizon: 12
+  reps: 1000
+  min_df_resid: 5                  # window skipped if fewer residual degrees of freedom
+
+windows:                           # pre-episode estimation windows (plan Section 7)
+  full:    {label: Full sample, end: null}
+  pre2008: {label: Pre-2008,   end: "2007-12-31"}
+  pre2014: {label: Pre-2014,   end: "2014-06-30"}
+  pre2022: {label: Pre-2022,   end: "2022-01-31"}
+  pre2026: {label: Pre-2026,   end: "2026-02-28"}
+  # sub-sample split (tests H3 and H5)
+  pre_it:  {label: "2004-2015 (pre inflation targeting)", start: "2004-01-31", end: "2015-12-31", split: true}
+  post_it: {label: "2016-latest (inflation targeting)",   start: "2016-01-31", end: null,         split: true}
+
+rolling:
+  window: 96
+  step: 6
+  response: cpi
+  horizon_months: 12
+
+scenario:
+  shock_min: -40
+  shock_max: 80
+  shock_step: 5
+  shock_default: 30
+  bands: [68, 90]
+  plausibility_bps_range_10pct: [20, 60]     # Section 11: outside 20-60 bps => build log flags it for review
+  red_flag_bps_range_10pct: [10, 60]         # Section 3: far outside, i.e. beyond 10-60 bps => red flag
+  rbi_benchmark_bps_10pct: [20, 30]          # RBI Bulletin, July 2025 (headline +20 bps; +30 short-run)
+  rbi_benchmark_label: "RBI Bulletin, July 2025"
+  block_exog_similar_pct: 25                 # specs within this % of the baseline count as "barely changed"
+
+local_projections:
+  horizons: 24
+  lags: 4
+  nw_lags: 6
+
+asymmetry:                         # stretch
+  enabled: true
+  horizons: 24
+
+# ---------------------------------------------------------------- Layer 2
+forecast:
+  quantiles: [0.05, 0.10, 0.50, 0.90, 0.95]
+  origins:
+    monthly_start: "2012-01-31"
+    quarterly_start: "2012-03-31"
+  stride: 1                        # --fast sets this to 3
+  min_train_months: 60
+  min_train_quarters: 24
+  targets:
+    cpi:
+      label: CPI inflation (y-o-y %)
+      freq: M
+      z: cpi_yoy                   # series the models are fit on
+      kind: level                  # target at h = z[t+h]
+      horizons: 12
+      exog: [oil]
+      exog_lags: 3
+      units: "%"
+    inr:
+      label: USD/INR (% change from origin)
+      freq: M
+      z: inr
+      kind: cum                    # target at h = sum_{j<=h} z[t+j]
+      horizons: 12
+      exog: [oil, d_fedfunds, vix]
+      exog_lags: 2
+      units: "%"
+    gdp:
+      label: Real GDP growth (y-o-y %)
+      freq: Q
+      z: gdp_growth
+      kind: level
+      horizons: 4
+      exog: [oil]
+      exog_lags: 2
+      units: "%"
+  exog_hold:                       # how non-oil exogenous inputs behave in the future
+    oil: path                      # taken from the oil assumption
+    d_fedfunds: zero
+    vix: last
+  baselines:
+    seasonal_period: {M: 12, Q: 4}
+    ar_maxlags: {M: 12, Q: 4}
+    bootstrap_reps: 500
+    empirical_min_errors: 24
+  arimax:
+    max_p: 2
+    max_q: 2
+    reselect_every: 12             # origins; order is chosen on training data only
+  xgb:
+    max_depth: 3
+    n_estimators: 300
+    learning_rate: 0.05
+    subsample: 0.8
+    tune_window_end: "2015-12-31"  # tune only on the pre-2016 window
+    features:                      # {column: number_of_lags}; lag 1 = latest value known at the origin
+      cpi:
+        monthly: {cpi_yoy: 12, cpi_mom_sa: 12, oil: 6, brent_inr_chg: 6, inr: 6, repo: 6, iip_yoy: 6}
+      inr:
+        monthly: {inr: 12, oil: 6, d_fedfunds: 3, vix: 3, repo: 3, cpi_yoy: 3}
+      gdp:
+        quarterly: {gdp_growth: 4, oil: 2, iip_yoy: 2, repo: 2, cpi_yoy: 2}
+    month_dummies: true
+    regime_dummy: inflation_targeting
+  oil_grid:
+    min_pct: -30
+    max_pct: 60
+    step: 10
+    horizon_months: 12
+  oil_presets: {flat: 0, up20: 20, up50: 50, down20: -20}   # total 12-month change, %
+  calm_exclusion: episodes        # calm = outside every episode test window
+
+# ---------------------------------------------------------------- Layer 3
+stress:
+  max_horizon: 24
+  models: [naive, snaive, ar, arimax, var, xgb]
+  covariate_models: [arimax, var, xgb, timesfm_cov]
+  frozen_episode: westasia_2026
+  freeze_tag: freeze-2026-02
+  taylor_gap_in_policy_gap: false
+
+# ---------------------------------------------------------------- Policy Lab
+policy:
+  pi_target: 4.0                   # RBI target, %
+  a_pi: 0.5                        # Taylor's original weights
+  a_y: 0.5
+  r_star: 1.5                      # assumption, labelled in the app
+  hp_lambda: 1600
+  crude_imports_mt_fy25: 242.4     # PPAC via India Sea Trade News
+  barrels_per_tonne: 7.33
+  # Editable ASSUMPTIONS, not sourced data: replace with PPAC consumption statistics.
+  petrol_litres_per_year: 50.0e9
+  diesel_litres_per_year: 110.0e9
+  retail_hike_annotation: "2026-05-31"
+
+# ---------------------------------------------------------------- Links shown on the About page
+links:
+  repo_url: null                   # set to the public GitHub repo URL once it exists
+
+# ---------------------------------------------------------------- TimesFM (stretch)
+timesfm:
+  version: "2.5"
+  checkpoint: "google/timesfm-2.5-200m-pytorch"
+  context: 512
+  origin_stride: 3                 # every third origin if too slow (state this when presenting)
+
+# ---------------------------------------------------------------- Synthetic demo mode
+demo:
+  seed: 7
+  end: "2026-09-30"
+  note: Synthetic data for exercising the code only. Never present results from demo mode as findings.

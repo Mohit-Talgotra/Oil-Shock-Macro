@@ -1,0 +1,9 @@
+# No `base` is set, so Streamlit follows the viewer's light/dark preference.
+[theme]
+primaryColor = "#c0392b"
+
+[server]
+headless = true
+
+[browser]
+gatherUsageStats = false

@@ -1,0 +1,12 @@
+# Pipeline / development dependencies (plan Section 5).
+-r requirements.txt
+fredapi
+openpyxl
+scikit-learn
+shap
+pytest
+ruff
+pre-commit
+# Stretch layer, run offline only (never add to requirements.txt). Remove this line if the install
+# fails on your machine and use Google Colab for `make timesfm` instead (plan Section 15).
+timesfm[torch]

@@ -1,0 +1,19 @@
+# Dummies and policy events (plan Sections 4 and 3).
+# Dates marked verify: true are from general knowledge - confirm against official releases.
+
+dummies:
+  covid:             {start: "2020-04-30", end: "2020-09-30"}   # monthly COVID window
+  covid_q:           {quarters: ["2020Q2", "2020Q3"]}            # mandatory in Model B
+  demonetisation:    {start: "2016-11-30", end: "2017-01-31"}
+  gst:               {start: "2017-07-31", end: "2017-07-31"}
+  inflation_targeting: {start: "2016-06-30", end: null}          # regime dummy: 1 from here onward
+
+policy_events:
+  - {date: "2014-10-31", kind: fuel_price, label: Diesel prices deregulated, verify: true}
+  - {date: "2021-11-30", kind: excise,     label: Central excise cut on petrol and diesel, verify: true}
+  - {date: "2022-05-31", kind: excise,     label: Further excise cut on petrol and diesel, verify: true}
+  - {date: "2022-05-31", kind: repo,       label: "RBI begins hiking: repo 4.00% -> 6.50% by Feb 2023", verify: true}
+  - {date: "2023-02-28", kind: repo,       label: Repo reaches 6.50%, verify: true}
+  - {date: "2026-05-31", kind: fuel_price, label: First retail petrol/diesel price hike in four years}
+  - {date: "2026-01-31", kind: data,       label: MOSPI switches to the 2024-base CPI}
+  - {date: "2026-02-27", kind: data,       label: MOSPI releases the 2022-23-base GDP series}

@@ -1,0 +1,239 @@
+# Single source of truth for every series (plan Section 4).
+# Every chart caption on the dashboard reads its source line from this file.
+#
+# sources[].kind:
+#   fred    -> downloaded by oilshock.data.fetch.fetch_all (needs FRED_API_KEY)
+#   manual  -> file placed in data/raw/manual/ and parsed by oilshock.data.parsers
+#   derived -> computed from other series
+# splice: list of growth-rate splices applied oldest -> newest (never on index levels).
+
+series:
+  - key: brent_usd
+    name: Brent crude, monthly average
+    units: US$/bbl
+    freq: M
+    use_from: 1992
+    transform: 100 x dlog
+    sources:
+      - {kind: fred, id: POILBREUSDM, url: "https://fred.stlouisfed.org/series/POILBREUSDM", publisher: IMF via FRED}
+    notes: Updated to Jul 2026 as of Aug 2026. Daily DCOILBRENTEU feeds the "latest" tile.
+
+  - key: brent_daily
+    name: Brent crude, daily
+    units: US$/bbl
+    freq: D
+    use_from: 1987
+    transform: none (Home tile only)
+    sources:
+      - {kind: fred, id: DCOILBRENTEU, url: "https://fred.stlouisfed.org/series/DCOILBRENTEU", publisher: EIA via FRED}
+
+  - key: inr_usd
+    name: Rupees per US dollar, monthly average
+    units: INR/USD
+    freq: M
+    use_from: 1973
+    transform: 100 x dlog (up = depreciation)
+    sources:
+      - {kind: fred, id: EXINUS, url: "https://fred.stlouisfed.org/series/EXINUS", publisher: Federal Reserve G.5 via FRED}
+    notes: Updated to Sep 2026.
+
+  - key: brent_inr
+    name: Brent crude in rupees
+    units: INR/bbl
+    freq: M
+    use_from: 2004
+    transform: 100 x dlog
+    sources:
+      - {kind: derived, formula: "brent_usd * inr_usd"}
+    notes: What Indian refiners actually pay; alternative shock variable.
+
+  - key: cpi
+    name: CPI headline index, spliced
+    units: index (y-o-y %, m-o-m % SA after transformation)
+    freq: M
+    use_from: 2004
+    transform: y-o-y % and seasonally adjusted m-o-m %
+    sources:
+      - {kind: fred, id: INDCPIALLMINMEI, role: old, url: "https://fred.stlouisfed.org/series/INDCPIALLMINMEI", publisher: OECD via FRED}
+      - {kind: manual, file: mospi_cpi_2024_back.xlsx, role: new, publisher: MOSPI, base: 2024}
+    splice:
+      - {old: fred_INDCPIALLMINMEI, new: mospi_cpi_2024, switch: "2014-01-31", kind: yoy_and_mom}
+    notes: >
+      OECD copy on FRED ends March 2025 (history only). MOSPI moved to a 2024-base CPI from the January 2026
+      release; back series to 2013. Splice on growth rates, not levels. Food weight fell from 45.86% to 36.75%.
+
+  - key: cpi_fuel
+    name: CPI fuel and light
+    units: y-o-y %
+    freq: M
+    use_from: 2014
+    transform: y-o-y %
+    sources:
+      - {kind: manual, file: mospi_cpi_2024_back.xlsx, column: "Fuel and Light", publisher: MOSPI}
+    notes: Optional. Group definitions changed with the 2024 base (12 COICOP divisions).
+
+  - key: cpi_core
+    name: CPI excluding food and fuel
+    units: y-o-y %
+    freq: M
+    use_from: 2014
+    transform: y-o-y %
+    sources:
+      - {kind: manual, file: mospi_cpi_2024_back.xlsx, column: "Core", publisher: MOSPI}
+    notes: Optional.
+
+  - key: wpi_fuel
+    name: WPI fuel and power
+    units: y-o-y %
+    freq: M
+    use_from: 2005
+    transform: y-o-y %
+    sources:
+      - {kind: manual, file: eoa_wpi_fuel.xlsx, publisher: Office of the Economic Adviser, DPIIT}
+    notes: Producer-level pass-through for the CPI vs WPI panel.
+
+  - key: repo
+    name: RBI policy repo rate (month-end)
+    units: "%"
+    freq: M
+    use_from: 2004
+    transform: level and first difference
+    sources:
+      - {kind: manual, file: rbi_repo.xlsx, url: "https://data.rbi.org.in/", publisher: RBI DBIE}
+    notes: File lists change dates; they are expanded into a monthly step series.
+
+  - key: wacr
+    name: Weighted average call money rate
+    units: "%"
+    freq: M
+    use_from: 2004
+    transform: level
+    sources:
+      - {kind: manual, file: rbi_wacr.xlsx, url: "https://data.rbi.org.in/", publisher: RBI DBIE}
+    notes: Market rate; robustness check for repo.
+
+  - key: iip
+    name: Index of Industrial Production
+    units: index
+    freq: M
+    use_from: 2005
+    transform: y-o-y % (and 100 x dlog, seasonally adjusted, in the VAR)
+    sources:
+      - {kind: manual, file: mospi_iip.xlsx, publisher: MOSPI}
+    notes: Monthly activity proxy for GDP; check for a base revision before downloading.
+
+  - key: gdp_growth
+    name: Real GDP growth, y-o-y
+    units: "%"
+    freq: Q
+    use_from: 2004Q2
+    transform: level of y-o-y %
+    sources:
+      - {kind: fred, id: NAEXKP01INQ652S, role: old, url: "https://fred.stlouisfed.org/series/NAEXKP01INQ652S", publisher: OECD via FRED}
+      - {kind: manual, file: mospi_gdp_2011.xlsx, role: mid, publisher: MOSPI, base: "2011-12"}
+      - {kind: manual, file: mospi_gdp_2022.xlsx, role: new, publisher: MOSPI, base: "2022-23"}
+    splice:
+      - {old: fred_NAEXKP01INQ652S, new: mospi_gdp_2011, switch: "2012-06-30", kind: yoy}
+      - {old: spliced, new: mospi_gdp_2022, switch: "2022-06-30", kind: yoy}
+    notes: >
+      OECD copy ends Q3 2023 (history only). 2022-23 base published 27 Feb 2026 from Q1 FY23; full back series
+      expected by Dec 2026 - swap it in when it lands. Switch months are defaults: adjust after inspecting files.
+
+  - key: gdp_nominal
+    name: Nominal GDP
+    units: INR crore (quarterly)
+    freq: Q
+    use_from: 2004Q2
+    transform: denominator for cab_gdp
+    sources:
+      - {kind: manual, file: mospi_gdp_nominal.xlsx, publisher: MOSPI}
+    notes: Needed to express the current account as % of GDP (converted with the average inr_usd).
+
+  - key: cab
+    name: Current account balance
+    units: US$ mn (quarterly)
+    freq: Q
+    use_from: 2004Q2
+    transform: "% of GDP"
+    sources:
+      - {kind: manual, file: rbi_bop.xlsx, url: "https://data.rbi.org.in/", publisher: RBI DBIE, table: quarterly balance of payments}
+
+  - key: excise
+    name: Central excise on petrol and diesel
+    units: INR/litre
+    freq: event
+    use_from: 2010
+    transform: event table
+    sources:
+      - {kind: manual, file: ppac_excise.xlsx, publisher: PPAC price build-up and Gazette notifications}
+    notes: Used in the fiscal panel and as episode annotations.
+
+  - key: crude_imports
+    name: Crude oil import volume
+    units: million tonnes
+    freq: M
+    use_from: 2010
+    transform: level
+    sources:
+      - {kind: manual, file: ppac_crude_imports.xlsx, publisher: PPAC}
+    notes: Feeds the import-bill calculator.
+
+  - key: fedfunds
+    name: US federal funds rate
+    units: "%"
+    freq: M
+    use_from: 2004
+    transform: level, exogenous (first difference in the VAR)
+    sources:
+      - {kind: fred, id: FEDFUNDS, url: "https://fred.stlouisfed.org/series/FEDFUNDS", publisher: Federal Reserve via FRED}
+    notes: Global financial conditions control.
+
+  - key: vix
+    name: CBOE VIX, monthly average
+    units: index
+    freq: M
+    use_from: 2004
+    transform: level, exogenous
+    sources:
+      - {kind: fred, id: VIXCLS, url: "https://fred.stlouisfed.org/series/VIXCLS", publisher: CBOE via FRED, daily: true}
+    notes: Risk-off control for capital flows. Daily series averaged to months.
+
+  - key: dummies
+    name: Event dummies
+    units: 0/1
+    freq: M/Q
+    use_from: 2004
+    transform: none
+    sources:
+      - {kind: manual, file: config/events.yaml, publisher: hand-coded}
+    notes: COVID, demonetisation, GST launch, inflation-targeting regime.
+
+# Checks used by `pipeline.py data` (plan Section 11).
+checks:
+  max_abs_monthly_change:        # percent, per series, on the transformed value
+    brent_usd: 60
+    inr_usd: 10
+    cpi_yoy: 5
+    iip: 80
+    repo: 3                      # pp; a 3 pp repo move in a month means a parsing error
+    wpi_fuel_yoy: 40
+    cpi_fuel_yoy: 40
+  splice_mean_gap_threshold_pp: 0.5
+  expected_last_month:           # series considered stale if older than this many months before the cut-off
+    default_staleness_months: 3
+
+# Spot checks (plan Section 11): five hand-picked values per manual source, copied from the OFFICIAL release.
+# Format: {panel_column: [{date: "YYYY-MM-DD", value: <number>, tol: <abs tolerance>}, ...]}
+# Columns are checked on the monthly panel (or the quarterly panel for gdp_growth, cab_gdp).
+# Empty on purpose: values must come from the official releases, never from this repo.
+# `pipeline.py data` warns for every manual source that has fewer than `spot_check_min` entries.
+spot_check_min: 5
+spot_check_sources:               # manual source -> panel column that represents it
+  cpi: cpi_yoy
+  repo: repo
+  iip: iip
+  wpi_fuel: wpi_fuel_yoy
+  gdp_growth: gdp_growth
+  cab: cab_gdp
+  crude_imports: crude_imports
+spot_checks: {}

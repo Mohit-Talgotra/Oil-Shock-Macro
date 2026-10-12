@@ -1,0 +1,54 @@
+# Oil episodes (plan Sections 3, 7 and 9).
+# 2007-08, 2014-16 and 2021-22 policy details are from general knowledge:
+# confirm dates against RBI press releases before putting them on slides.
+episodes:
+  gfc_2008:
+    label: 2007-08 spike and crash
+    short: GFC 2008
+    train_end: "2007-12-31"
+    test_start: "2008-01-31"
+    test_end: "2008-12-31"
+    direction: spike, then crash
+    color: "#c0392b"
+    caution: "Shortest training history (from 2004): widest uncertainty."
+    notes:
+      - Record oil high in mid-2008, then collapse in the global financial crisis.
+      - RBI tightened through mid-2008, then cut sharply after September 2008.
+  collapse_2014:
+    label: 2014-16 collapse
+    short: Collapse 2014-16
+    train_end: "2014-06-30"
+    test_start: "2014-07-31"
+    test_end: "2016-06-30"
+    direction: down
+    color: "#2471a3"
+    notes:
+      - Brent fell from above $100 to under $30.
+      - Government raised excise duties and banked the windfall; diesel prices deregulated in October 2014.
+  ukraine_2022:
+    label: 2021-22 Russia-Ukraine spike
+    short: Ukraine 2022
+    train_end: "2022-01-31"
+    test_start: "2022-02-28"
+    test_end: "2023-01-31"
+    direction: up
+    color: "#d68910"
+    notes:
+      - Sharp spike after the invasion; main up-shock under inflation targeting.
+      - Excise cuts on petrol and diesel; RBI raised the repo rate from 4.00% to 6.50% between May 2022 and February 2023.
+  westasia_2026:
+    label: 2026 West Asia conflict (live)
+    short: West Asia 2026
+    train_end: "2026-02-28"
+    test_start: "2026-03-31"
+    test_end: null                 # open-ended: scored as new data arrive
+    direction: up
+    live: true
+    color: "#7d3c98"
+    notes:
+      - Brent monthly average about $99 in March and $103-104 in April-May 2026, about $84 by June-July, back above $100 on 9 September.
+      - Rupee near 95-96 per dollar; first retail fuel price hike in four years in May 2026.
+      - Forecasts frozen at end-February 2026 (git tag freeze-2026-02) and re-scored, never regenerated.
+
+# Order used in selectors and tables.
+order: [gfc_2008, collapse_2014, ukraine_2022, westasia_2026]
