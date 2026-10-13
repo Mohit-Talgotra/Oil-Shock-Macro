@@ -189,7 +189,7 @@ def plausibility_checks(
     bps = scenario.first_year_cpi_bps(irf_a, 10.0)
     lo, hi = cfg["scenario"]["plausibility_bps_range_10pct"]
     rlo, rhi = cfg["scenario"]["red_flag_bps_range_10pct"]
-    red = "; RED FLAG (outside %g-%g bps)" % (rlo, rhi) if not rlo <= bps <= rhi else ""
+    red = f"; RED FLAG (outside {rlo:g}-{rhi:g} bps)" if not rlo <= bps <= rhi else ""
     checks.append(
         Check(
             "cpi_response_in_rbi_range",
