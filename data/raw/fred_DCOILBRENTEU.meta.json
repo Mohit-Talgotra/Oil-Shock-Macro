@@ -1,0 +1,10 @@
+{
+  "source": "FRED",
+  "series_id": "DCOILBRENTEU",
+  "url": "https://fred.stlouisfed.org/series/DCOILBRENTEU",
+  "retrieved_at": "2026-10-19T17:00:10+00:00",
+  "n_obs": 9108,
+  "first": "1987-05-20",
+  "last": "2026-10-14",
+  "note": "Downloaded via no-key fredgraph.csv endpoint by fred subagent; normalized to date,value headers"
+}

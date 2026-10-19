@@ -1,0 +1,10 @@
+{
+  "source": "FRED",
+  "series_id": "NAEXKP01INQ652S",
+  "url": "https://fred.stlouisfed.org/series/NAEXKP01INQ652S",
+  "retrieved_at": "2026-10-19T17:00:10+00:00",
+  "n_obs": 110,
+  "first": "1996-04-01",
+  "last": "2023-07-01",
+  "note": "Downloaded via no-key fredgraph.csv endpoint by fred subagent; normalized to date,value headers"
+}

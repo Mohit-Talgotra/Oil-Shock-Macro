@@ -1,0 +1,10 @@
+{
+  "source": "FRED",
+  "series_id": "VIXCLS",
+  "url": "https://fred.stlouisfed.org/series/VIXCLS",
+  "retrieved_at": "2026-10-19T17:00:10+00:00",
+  "n_obs": 9297,
+  "first": "1990-01-02",
+  "last": "2026-10-16",
+  "note": "Downloaded via no-key fredgraph.csv endpoint by fred subagent; normalized to date,value headers"
+}

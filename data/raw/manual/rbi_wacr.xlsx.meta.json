@@ -1,0 +1,7 @@
+{
+  "key": "wacr",
+  "file": "rbi_wacr.xlsx",
+  "url": "https://data.rbi.org.in/DBIE/ daily WACR (DBIE 198) averaged to month-end",
+  "downloaded": "2026-10-19",
+  "note": "Fetched by tmux subagents 2026-10-19; see /tmp/pi-subagents/1792426810-oilshock/downloads for raw originals+proof"
+}

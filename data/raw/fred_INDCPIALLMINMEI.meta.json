@@ -1,0 +1,10 @@
+{
+  "source": "FRED",
+  "series_id": "INDCPIALLMINMEI",
+  "url": "https://fred.stlouisfed.org/series/INDCPIALLMINMEI",
+  "retrieved_at": "2026-10-19T17:00:10+00:00",
+  "n_obs": 819,
+  "first": "1957-01-01",
+  "last": "2025-03-01",
+  "note": "Downloaded via no-key fredgraph.csv endpoint by fred subagent; normalized to date,value headers"
+}

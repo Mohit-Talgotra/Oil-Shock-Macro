@@ -1,0 +1,10 @@
+{
+  "source": "FRED",
+  "series_id": "EXINUS",
+  "url": "https://fred.stlouisfed.org/series/EXINUS",
+  "retrieved_at": "2026-10-19T17:00:10+00:00",
+  "n_obs": 645,
+  "first": "1973-01-01",
+  "last": "2026-09-01",
+  "note": "Downloaded via no-key fredgraph.csv endpoint by fred subagent; normalized to date,value headers"
+}

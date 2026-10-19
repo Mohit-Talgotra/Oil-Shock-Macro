@@ -7,11 +7,28 @@ __pycache__/
 .env
 .DS_Store
 # raw downloads can be large; keep the manual README only (plan Section 12)
+# data commit 2026-10-19: track the 7 FRED series + 11 tidy manual files + provenance
+# (large source PDFs/dumps stay in /tmp, not committed)
 data/raw/*
 !data/raw/.gitkeep
+!data/raw/fred_*.csv
+!data/raw/fred_*.meta.json
 !data/raw/manual/
 data/raw/manual/*
 !data/raw/manual/README.md
+!data/raw/manual/rbi_repo.xlsx
+!data/raw/manual/rbi_wacr.xlsx
+!data/raw/manual/rbi_wacr.original.xlsx
+!data/raw/manual/rbi_bop.xlsx
+!data/raw/manual/mospi_cpi_2024_back.xlsx
+!data/raw/manual/mospi_gdp_2011.xlsx
+!data/raw/manual/mospi_gdp_2022.xlsx
+!data/raw/manual/mospi_gdp_nominal.xlsx
+!data/raw/manual/mospi_iip.xlsx
+!data/raw/manual/eoa_wpi_fuel.xlsx
+!data/raw/manual/ppac_crude_imports.xlsx
+!data/raw/manual/ppac_excise.xlsx
+!data/raw/manual/*.meta.json
 data/interim/*
 !data/interim/.gitkeep
 # synthetic demo output is never committed

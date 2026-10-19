@@ -1,0 +1,7 @@
+{
+  "key": "repo",
+  "file": "rbi_repo.xlsx",
+  "url": "https://data.rbi.org.in/DBIE/ key rates + https://dbie.rbihub.in mirror_r531_key_rates.csv",
+  "downloaded": "2026-10-19",
+  "note": "Fetched by tmux subagents 2026-10-19; see /tmp/pi-subagents/1792426810-oilshock/downloads for raw originals+proof"
+}

@@ -1,0 +1,10 @@
+{
+  "source": "FRED",
+  "series_id": "FEDFUNDS",
+  "url": "https://fred.stlouisfed.org/series/FEDFUNDS",
+  "retrieved_at": "2026-10-19T17:00:10+00:00",
+  "n_obs": 867,
+  "first": "1954-07-01",
+  "last": "2026-09-01",
+  "note": "Downloaded via no-key fredgraph.csv endpoint by fred subagent; normalized to date,value headers"
+}
