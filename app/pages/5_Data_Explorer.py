@@ -41,7 +41,7 @@ if transform == "Year-on-year %":
 elif transform == "Δ log ×100":
     with np.errstate(invalid="ignore", divide="ignore"):
         x = (100 * np.log(df[cols]).diff()).loc[x.index]
-st.plotly_chart(charts.series_lines(x, cols), use_container_width=True)
+st.plotly_chart(charts.series_lines(x, cols), width="stretch")
 keys = [k for k in cols if k in sbk] or ["brent_usd"]
 C.source_caption(keys, f"{transform}; shaded bands are the oil episodes.")
 st.download_button(
@@ -61,7 +61,7 @@ for s in config.series_cfg()["series"]:
             "variable": s["name"],
             "frequency": s["freq"],
             "units": s["units"],
-            "used from": s.get("use_from", ""),
+            "used from": str(s.get("use_from", "")),
             "transformation": s.get("transform", ""),
             "source": src.get("publisher", ""),
             "id / file": src.get("id") or src.get("file") or src.get("formula", ""),
@@ -72,6 +72,6 @@ for s in config.series_cfg()["series"]:
 st.dataframe(
     pd.DataFrame(rows),
     hide_index=True,
-    use_container_width=True,
+    width="stretch",
     column_config={"link": st.column_config.LinkColumn("link")},
 )

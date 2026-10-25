@@ -119,7 +119,7 @@ else:
                     spec.units,
                     name="Median",
                 ),
-                use_container_width=True,
+                width="stretch",
             )
             origin = pd.to_datetime(rows["origin"]).max()
             last = rows.iloc[-1]
@@ -215,7 +215,7 @@ else:
         },
         na_rep="–",
     )
-    st.dataframe(styled, use_container_width=True)
+    st.dataframe(styled, width="stretch")
     st.caption(
         f"Rolling-origin backtest from 2012, horizon {horizon}. MASE below 1 beats 'no change'; coverage should be near 80% / 95%; "
         "DM p < 0.05 means the accuracy difference from naive is statistically meaningful. Best value per column in green. "
@@ -226,7 +226,7 @@ else:
 shap = C.artifact(f"forecasts/shap_xgb_{tname}.parquet")
 if shap is not None:
     with st.expander("What drives the XGBoost forecast? (SHAP)"):
-        st.plotly_chart(charts.shap_bar(shap), use_container_width=True)
+        st.plotly_chart(charts.shap_bar(shap), width="stretch")
         st.caption(
             "Mean absolute SHAP value of each input for the median forecast at a 6-period horizon. `oil_fut_cum` is the assumed future oil path; `_lK` is the value K−1 periods before the origin."
         )

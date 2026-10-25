@@ -32,6 +32,7 @@ var_quarterly:                     # Model B
   exog: [covid_q]
   maxlags: 2
   fixed_lags: 2
+  whiteness_nlags: 4
   horizon: 12
   reps: 1000
   min_df_resid: 5                  # window skipped if fewer residual degrees of freedom
@@ -165,8 +166,8 @@ policy:
   crude_imports_mt_fy25: 242.4     # PPAC via India Sea Trade News
   barrels_per_tonne: 7.33
   # Editable ASSUMPTIONS, not sourced data: replace with PPAC consumption statistics.
-  petrol_litres_per_year: 50.0e9
-  diesel_litres_per_year: 110.0e9
+  petrol_litres_per_year: 50.0e+9   # YAML needs the sign, else it parses as a string
+  diesel_litres_per_year: 110.0e+9
   retail_hike_annotation: "2026-05-31"
 
 # ---------------------------------------------------------------- Links shown on the About page

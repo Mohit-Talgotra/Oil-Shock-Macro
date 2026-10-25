@@ -1,0 +1,10 @@
+{
+  "source": "FRED",
+  "series_id": "INDPRINTO01IXOBM",
+  "url": "https://fred.stlouisfed.org/series/INDPRINTO01IXOBM",
+  "retrieved_at": "2026-10-25T07:00:00+00:00",
+  "n_obs": 360,
+  "first": "1994-04-01",
+  "last": "2024-03-01",
+  "note": "OECD MEI: production volume, industry except construction, India, NSA, index 2015=100. Copied from the FRED table page (fred.stlouisfed.org/data/INDPRINTO01IXOBM) via the browser pane because the fredgraph.csv endpoint was blocked. History only; ends Mar 2024."
+}

@@ -60,7 +60,7 @@ origin = panel.index[panel.index <= ep.train_end].max()
 hist = panel[spec.z] if spec.kind == "level" else None
 st.plotly_chart(
     charts.episode_chart(res, hist, monthly["brent_usd"], spec.label, spec.units, origin),
-    use_container_width=True,
+    width="stretch",
 )
 C.source_caption(
     [{"cpi": "cpi", "inr": "inr_usd", "gdp": "gdp_growth"}[tname], "brent_usd"],
@@ -104,7 +104,7 @@ st.dataframe(
         },
         na_rep="–",
     ),
-    use_container_width=True,
+    width="stretch",
 )
 st.caption(
     "Bias > 0: the model under-predicted. Shock penalty = episode RMSE ÷ the model's calm-period RMSE at the same horizons (above 1 = it degrades in shocks). "
@@ -130,7 +130,7 @@ st.markdown(
 )
 
 st.subheader("Do the bands warn?")
-st.plotly_chart(charts.coverage_bar(sm), use_container_width=True)
+st.plotly_chart(charts.coverage_bar(sm), width="stretch")
 C.source_caption(
     [{"cpi": "cpi", "inr": "inr_usd", "gdp": "gdp_growth"}[tname]],
     "Share of outcomes inside each model's 80% band, against the nominal 80%.",

@@ -517,6 +517,8 @@ def diagnostics(
             out[f"granger_oil_to_{v}"] = float("nan")
     if fevd is not None:
         for h in (6, 12, 24):
+            if h not in set(fevd["horizon"]):  # quarterly Model B only runs 12 periods
+                continue
             sub = fevd[fevd["horizon"] == h].set_index("variable")["share_oil"]
             for v in names:
                 out[f"fevd_{v}_h{h}"] = float(sub[v])

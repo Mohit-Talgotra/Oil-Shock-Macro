@@ -1,6 +1,6 @@
 # App-only dependencies (deployed to Streamlit Community Cloud).
 # Pin exact versions once Phase 1 works (plan Section 12).
-streamlit>=1.40
+streamlit>=1.50
 plotly>=5.24
 pandas>=2.2
 numpy

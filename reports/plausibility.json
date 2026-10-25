@@ -1,0 +1,32 @@
+[
+  {
+    "name": "cpi_cumulative_12m_positive",
+    "ok": true,
+    "level": "error",
+    "detail": "12-month cumulative CPI response per 1 s.d. = 0.152 pp"
+  },
+  {
+    "name": "rupee_depreciates_on_impact",
+    "ok": false,
+    "level": "error",
+    "detail": "INR impact response = -0.194"
+  },
+  {
+    "name": "cpi_response_in_rbi_range",
+    "ok": false,
+    "level": "flag",
+    "detail": "18 bps per +10% oil vs RBI benchmark range 20-60 bps; investigate sample, ordering, lags, splicing"
+  },
+  {
+    "name": "var_stable",
+    "ok": true,
+    "level": "error",
+    "detail": "min root modulus 1.491"
+  },
+  {
+    "name": "residual_whiteness",
+    "ok": true,
+    "level": "error",
+    "detail": "Portmanteau p-value = 0.103"
+  }
+]

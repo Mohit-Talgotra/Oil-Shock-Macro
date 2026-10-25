@@ -35,3 +35,6 @@ data/interim/*
 demo/
 notebooks/.ipynb_checkpoints/
 miscellaneous
+
+# Claude Code local settings
+.claude/settings.local.json

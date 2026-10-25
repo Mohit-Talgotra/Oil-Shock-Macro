@@ -46,7 +46,7 @@ for s in config.series_cfg()["series"]:
 st.dataframe(
     pd.DataFrame(rows),
     hide_index=True,
-    use_container_width=True,
+    width="stretch",
     column_config={"link": st.column_config.LinkColumn("link")},
 )
 
@@ -55,7 +55,7 @@ st.markdown(
     "MOSPI switched to a 2024-base CPI from the January 2026 release and a 2022-23-base GDP series on 27 February 2026 (full back series expected by December 2026). "
     "The OECD copies on FRED stopped updating (CPI in March 2025, real GDP in Q3 2023), so they are used for history only. "
     "Index levels are **never** spliced across base years: each series is converted to growth rates within its own base and the growth rates are joined at a stated switch month "
-    "(CPI: January 2014; GDP: the first quarter of each new base). A level index, where needed, is rebuilt by cumulating the spliced growth rates."
+    "(CPI: January 2014; GDP: the first quarter of each new base; IIP: May 2012, OECD history to MOSPI). A level index, where needed, is rebuilt by cumulating the spliced growth rates."
 )
 sp = config.paths().reports / "splice_check.csv"
 if sp.exists():
@@ -87,7 +87,7 @@ st.subheader("Hypotheses, tested against the estimates")
 hyp = pd.DataFrame(hypotheses.evaluate(C.artifact)).rename(
     columns={"id": "", "hypothesis": "Hypothesis", "status": "Status", "evidence": "Evidence"}
 )
-st.dataframe(hyp, hide_index=True, use_container_width=True)
+st.dataframe(hyp, hide_index=True, width="stretch")
 st.caption(
     "Computed from the stored estimates, not typed in. 'Consistent' is not proof: bands are wide and samples short."
 )
@@ -105,6 +105,19 @@ if len(rob):
         hide_index=True,
     )
 st.markdown(verdict)
+
+st.subheader("Known issues in this build")
+st.markdown(
+    """
+- **The rupee appreciates on impact.** In the oil-first VAR the rupee moves *stronger* on impact after an oil shock (about −0.19 s.d.), which fails the plan's plausibility check. The sign is the same in most sub-samples and under other orderings, and the 12-month cumulative rupee response is not significant in any window. Only the post-inflation-targeting window has the expected sign, and it is not significant. A possible explanation, **not tested**, is that Brent in dollars co-moves with a weak dollar. We report the result rather than change the check.
+- **Inflation response is at the low end.** About 18 bps per +10% oil in the first year, just under the 20–60 bps RBI benchmark range. Oil→CPI and oil→rupee Granger tests are not significant in any monthly window, so expect wide bands.
+- **IIP ends in March 2026**, which caps the monthly VAR sample (and the live 2026 episode inside it). Industrial output before April 2012 comes from OECD data on FRED, joined to MOSPI on month-on-month growth (overlap gap about 0.005 pp).
+- **Quarterly model (Model B) is thin.** Residual whiteness fails in several windows and the pre-2008 window has very few observations. Treat it as indicative.
+- **Short pre-2008 window.** About 47 monthly observations and one lag.
+- **The 2026 stress test is pseudo out-of-sample.** The model is frozen using data up to February 2026, but it was generated after the fact, so it is not a pre-registered forecast.
+- **Data gaps.** CPI fuel and core sub-indices, long excise history, WPI fuel before April 2012, WACR before July 2020 and the 2022-base GDP back series are unavailable. Hand-checked spot values against official releases are still to be added.
+"""
+)
 
 st.subheader("Limitations, stated openly")
 st.markdown(
@@ -140,7 +153,9 @@ repo_url = mcfg.get("links", {}).get("repo_url")
 if repo_url:
     st.markdown(f"Source code and artifacts: [{repo_url}]({repo_url})")
 else:
-    st.caption("Repository link: set `links.repo_url` in `config/models.yaml` once the public repo exists.")
+    st.caption(
+        "Repository link: set `links.repo_url` in `config/models.yaml` once the public repo exists."
+    )
 st.caption(
     "Everything is rebuilt from raw data with `make all` (see the repository README). Seeds live in `config/models.yaml`."
 )

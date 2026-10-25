@@ -118,7 +118,7 @@ nodes = [
     ),
 ]
 st.subheader("The seven channels")
-st.plotly_chart(charts.chain_diagram(nodes), use_container_width=True)
+st.plotly_chart(charts.chain_diagram(nodes), width="stretch")
 C.source_caption(
     ["brent_usd", "inr_usd", "cpi", "repo", "gdp_growth", "cab"],
     "Each box: scaled peak effect and when it peaks (0 = impact month). Boxes 1 and 7 come from the quarterly model.",
@@ -153,7 +153,7 @@ if show_lp and model == "A":
 fig = charts.irf_grid(scaled, band, vcfg["differenced"], list(vcfg["variables"]), lp, extra, unit)
 if extra:  # label the y-o-y panel
     fig.layout.annotations[min(len(vcfg["variables"]), 5)].text = "CPI inflation, y-o-y (pp)"
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width="stretch")
 C.source_caption(
     ["brent_usd", "inr_usd", "cpi", "repo", "iip"]
     if model == "A"
@@ -169,9 +169,7 @@ with left:
     fevd = C.artifact(f"var/fevd_{model}_{window}.parquet")
     if fevd is not None:
         hs = (6, 12, 24) if model == "A" else (2, 4, 8)
-        st.plotly_chart(
-            charts.fevd_bar(fevd, hs, list(vcfg["variables"])), use_container_width=True
-        )
+        st.plotly_chart(charts.fevd_bar(fevd, hs, list(vcfg["variables"])), width="stretch")
         C.source_caption(
             ["brent_usd", "cpi"],
             f"Forecast error variance decomposition at {hs[0]}, {hs[1]} and {hs[2]} {unit}.",
@@ -180,7 +178,7 @@ with right:
     st.subheader("Has pass-through changed over time?")
     roll = C.artifact("var/rolling_A_full.parquet")
     if roll is not None and len(roll):
-        st.plotly_chart(charts.rolling_passthrough(roll, band), use_container_width=True)
+        st.plotly_chart(charts.rolling_passthrough(roll, band), width="stretch")
         C.source_caption(
             ["brent_usd", "cpi"],
             "12-month CPI response to a +10% oil rise, 96-month rolling windows stepping 6 months. Wide bands in short windows are expected.",
@@ -208,6 +206,7 @@ with st.expander("Robustness: identification and diagnostics"):
         if len(d):
             show = d.T.reset_index()
             show.columns = ["check", "value"]
+            show["value"] = show["value"].astype(str)
             st.dataframe(show, hide_index=True)
             st.caption(
                 "Stability, whiteness (Portmanteau), normality (Jarque-Bera), Granger causality from oil and variance shares at 6/12/24."

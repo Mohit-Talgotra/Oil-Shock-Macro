@@ -165,7 +165,8 @@ def build_interim(
         out[col] = transform.yoy(groups[col], 12).rename(col)
 
     # --- GDP growth: chain the splices oldest -> newest
-    g_old = _fred_quarterly("NAEXKP01INQ652S", raw_dir)
+    # NAEXKP01INQ652S is real GDP in LEVELS (national currency): convert to y-o-y before splicing
+    g_old = transform.yoy(_fred_quarterly("NAEXKP01INQ652S", raw_dir), 4)
     g_mid = parsers.parse_mospi_gdp(manual_dir / "mospi_gdp_2011.xlsx", "2011-12")
     g_new = parsers.parse_mospi_gdp(manual_dir / "mospi_gdp_2022.xlsx", "2022-23")
     for s in (g_old, g_mid, g_new):
@@ -180,7 +181,25 @@ def build_interim(
     out["cab"] = parsers.parse_rbi_bop(manual_dir / "rbi_bop.xlsx")["cab"]
 
     # --- Monthly manual series
-    out["iip"] = parsers.parse_mospi_iip(manual_dir / "mospi_iip.xlsx")
+    iip_new = parsers.parse_mospi_iip(manual_dir / "mospi_iip.xlsx")
+    iip_old = _fred_monthly("INDPRINTO01IXOBM", raw_dir)
+    isw = cfg_switch(cfg, "iip")
+    mom_o, mom_n = transform.pct_change(iip_old, 1), transform.pct_change(iip_new, 1)
+    for s in (mom_o, mom_n):
+        s.attrs["kind"] = "growth"
+    splice_rows.append(
+        splice.overlap_report(
+            transform.yoy(iip_old, 12).rename("o").pipe(_growth),
+            transform.yoy(iip_new, 12).rename("n").pipe(_growth),
+            "iip_yoy",
+        )
+    )
+    splice_rows.append(splice.overlap_report(mom_o, mom_n, "iip_mom"))
+    iip_mom = splice.splice_growth(mom_o, mom_n, isw)
+    iip_lvl = transform.cumulate_growth(iip_mom.dropna(), 100.0)
+    # one constant rescale so the rebuilt index equals the MOSPI file (2011-12=100) from its first month
+    anchor = iip_new.dropna().index.min()
+    out["iip"] = (iip_lvl * (iip_new.loc[anchor] / iip_lvl.loc[anchor])).rename("iip")
     for fname, key, fn in [
         ("rbi_wacr.xlsx", "wacr", parsers.parse_rbi_wacr),
         ("eoa_wpi_fuel.xlsx", "wpi_fuel", parsers.parse_wpi_fuel),
@@ -204,6 +223,11 @@ def build_interim(
     report = splice.write_overlap_report(splice_rows, reports_dir / "splice_check.csv", thr)
     log.info("interim series written: %s", ", ".join(sorted(out)))
     return {"series": sorted(out), "splice": report}
+
+
+def _growth(s: pd.Series) -> pd.Series:
+    s.attrs["kind"] = "growth"
+    return s
 
 
 def cfg_switch(cfg: dict[str, Any], key: str) -> str:

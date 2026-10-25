@@ -77,7 +77,7 @@ else:
             repo["lo90"].to_numpy(),
             repo["hi90"].to_numpy(),
         ),
-        use_container_width=True,
+        width="stretch",
     )
     C.source_caption(
         ["repo", "cpi", "brent_usd"],
@@ -157,7 +157,7 @@ st.divider()
 
 # ---- CPI vs WPI -----------------------------------------------------------------------------
 st.subheader("Wholesale vs retail pass-through")
-st.plotly_chart(charts.cpi_vs_wpi(monthly), use_container_width=True)
+st.plotly_chart(charts.cpi_vs_wpi(monthly), width="stretch")
 C.source_caption(
     ["wpi_fuel", "cpi_fuel", "cpi"],
     "Producer fuel prices (WPI) move far more than retail (CPI) because retail fuel prices were administered; the gap is the government and oil companies absorbing the shock.",

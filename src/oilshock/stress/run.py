@@ -139,6 +139,8 @@ def run_episode(
         }
         for mname in models:
             fc_model = factory(mname, spec)
+            if getattr(fc_model, "horizons", h) < h:
+                fc_model.horizons = h  # direct models must be fitted out to the episode length
             if info_set == "oracle" and not fc_model.supports_covariates:
                 continue
             try:

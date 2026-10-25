@@ -92,10 +92,10 @@ class ARForecaster(Forecaster):
         top = max(1, min(self.maxlags, len(yy) // 4))
         best_bic, best = np.inf, None
         for p in range(1, top + 1):
-            res = AutoReg(yy, lags=p, trend="c", hold_back=top, old_names=False).fit()
+            res = AutoReg(yy, lags=p, trend="c", hold_back=top).fit()
             if res.bic < best_bic:
                 best_bic, best = res.bic, p
-        res = AutoReg(yy, lags=best, trend="c", old_names=False).fit()
+        res = AutoReg(yy, lags=best, trend="c").fit()
         self.p = int(best)
         self.params = np.asarray(res.params, dtype=float)  # const, phi_1..phi_p
         self.resid = np.asarray(res.resid, dtype=float)

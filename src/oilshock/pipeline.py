@@ -238,9 +238,12 @@ def _fit_window(
         if len(endog) - p - (k * p + 1 + m) < int(vcfg["min_df_resid"]):
             return None
     else:
+        # short windows (e.g. Pre-2008, 48 months): keep >= 4 observations per parameter so the
+        # residual covariance stays positive definite (plan Section 15: reduce lags for that window)
+        feasible = max(1, int((len(endog) / 4 - 1 - m) // k))
         sel = varmod.select_lags(
             endog,
-            int(vcfg["maxlags"]),
+            min(int(vcfg["maxlags"]), feasible),
             ex,
             float(vcfg["whiteness_alpha"]),
             int(vcfg["whiteness_nlags"]),

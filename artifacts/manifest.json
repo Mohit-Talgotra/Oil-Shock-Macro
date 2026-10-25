@@ -1,0 +1,89 @@
+{
+  "build_time_utc": "2026-10-25T15:38:12+00:00",
+  "git_commit": "a0483de",
+  "package_versions": {
+    "python": "3.13.5",
+    "numpy": "2.5.4",
+    "pandas": "3.1.0",
+    "scipy": "1.18.1",
+    "statsmodels": "0.15.0",
+    "xgboost": "3.4.1",
+    "scikit-learn": "1.9.1",
+    "streamlit": "1.66.1",
+    "plotly": "7.1.0",
+    "pyarrow": "26.0.0",
+    "shap": "0.54.1"
+  },
+  "series": [
+    "brent_usd",
+    "brent_daily",
+    "inr_usd",
+    "brent_inr",
+    "cpi",
+    "cpi_fuel",
+    "cpi_core",
+    "wpi_fuel",
+    "repo",
+    "wacr",
+    "iip",
+    "gdp_growth",
+    "gdp_nominal",
+    "cab",
+    "excise",
+    "crude_imports",
+    "fedfunds",
+    "vix",
+    "dummies"
+  ],
+  "synthetic": false,
+  "note": "",
+  "data_cutoff": "2026-07-31",
+  "quarterly_cutoff": "2026-09-30",
+  "monthly_rows": 271,
+  "quarterly_rows": 90,
+  "stages_run": [
+    "data",
+    "forecast",
+    "report",
+    "stress",
+    "var"
+  ],
+  "bootstrap_reps": 1000,
+  "var_seed": 20261012,
+  "plausibility": [
+    {
+      "name": "cpi_cumulative_12m_positive",
+      "ok": true,
+      "level": "error",
+      "detail": "12-month cumulative CPI response per 1 s.d. = 0.152 pp"
+    },
+    {
+      "name": "rupee_depreciates_on_impact",
+      "ok": false,
+      "level": "error",
+      "detail": "INR impact response = -0.194"
+    },
+    {
+      "name": "cpi_response_in_rbi_range",
+      "ok": false,
+      "level": "flag",
+      "detail": "18 bps per +10% oil vs RBI benchmark range 20-60 bps; investigate sample, ordering, lags, splicing"
+    },
+    {
+      "name": "var_stable",
+      "ok": true,
+      "level": "error",
+      "detail": "min root modulus 1.491"
+    },
+    {
+      "name": "residual_whiteness",
+      "ok": true,
+      "level": "error",
+      "detail": "Portmanteau p-value = 0.103"
+    }
+  ],
+  "cpi_bps_per_10pct_oil": 17.66620993730431,
+  "backtest_stride": 3,
+  "stress_rows": 97,
+  "freeze_tag": "freeze-2026-02"
+}

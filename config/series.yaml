@@ -119,8 +119,13 @@ series:
     use_from: 2005
     transform: y-o-y % (and 100 x dlog, seasonally adjusted, in the VAR)
     sources:
-      - {kind: manual, file: mospi_iip.xlsx, publisher: MOSPI}
-    notes: Monthly activity proxy for GDP; check for a base revision before downloading.
+      - {kind: fred, id: INDPRINTO01IXOBM, role: old, url: "https://fred.stlouisfed.org/series/INDPRINTO01IXOBM", publisher: OECD via FRED}
+      - {kind: manual, file: mospi_iip.xlsx, role: new, publisher: MOSPI}
+    splice:
+      - {old: fred_INDPRINTO01IXOBM, new: mospi_iip, switch: "2012-05-31", kind: mom}
+    notes: >
+      OECD copy on FRED (NSA, 2015=100) ends March 2024 (history only). MOSPI file starts Apr 2012. Spliced on
+      month-on-month growth rates, then the level is rebuilt by cumulating them (never splice levels).
 
   - key: gdp_growth
     name: Real GDP growth, y-o-y
@@ -134,7 +139,7 @@ series:
       - {kind: manual, file: mospi_gdp_2022.xlsx, role: new, publisher: MOSPI, base: "2022-23"}
     splice:
       - {old: fred_NAEXKP01INQ652S, new: mospi_gdp_2011, switch: "2012-06-30", kind: yoy}
-      - {old: spliced, new: mospi_gdp_2022, switch: "2022-06-30", kind: yoy}
+      - {old: spliced, new: mospi_gdp_2022, switch: "2023-06-30", kind: yoy}
     notes: >
       OECD copy ends Q3 2023 (history only). 2022-23 base published 27 Feb 2026 from Q1 FY23; full back series
       expected by Dec 2026 - swap it in when it lands. Switch months are defaults: adjust after inspecting files.
