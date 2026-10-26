@@ -1,6 +1,6 @@
 {
-  "build_time_utc": "2026-10-25T15:38:12+00:00",
-  "git_commit": "a0483de",
+  "build_time_utc": "2026-10-26T07:19:59+00:00",
+  "git_commit": "aa6df4d",
   "package_versions": {
     "python": "3.13.5",
     "numpy": "2.5.4",

@@ -129,6 +129,7 @@ forecast:
     n_estimators: 300
     learning_rate: 0.05
     subsample: 0.8
+    calibration_frac: 0.25         # latest share of training rows held out to calibrate the quantile bands
     tune_window_end: "2015-12-31"  # tune only on the pre-2016 window
     features:                      # {column: number_of_lags}; lag 1 = latest value known at the origin
       cpi:

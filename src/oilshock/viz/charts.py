@@ -7,6 +7,8 @@ chart; no hard-coded backgrounds, so figures follow Streamlit's light and dark t
 
 from __future__ import annotations
 
+import textwrap
+
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
@@ -87,15 +89,18 @@ def add_episode_shading(
         if x_max is not None and lo > pd.Timestamp(x_max):
             continue
         kw = {"row": row, "col": col} if row else {}
+        if labels:  # any annotation_* keyword makes plotly add an annotation ("new text" if empty)
+            kw.update(
+                annotation_text=ep.get("short", name),
+                annotation_position="top left",
+                annotation_font_size=10,
+            )
         fig.add_vrect(
             x0=lo,
             x1=hi,
             fillcolor=rgba(ep.get("color", "#888888"), 0.10),
             line_width=0,
             layer="below",
-            annotation_text=ep.get("short", name) if labels else None,
-            annotation_position="top left",
-            annotation_font_size=10,
             **kw,
         )
     return fig
@@ -107,8 +112,8 @@ def _layout(
     fig.update_layout(
         title=title,
         height=height,
-        margin=dict(l=10, r=10, t=50 if title else 20, b=10),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        margin=dict(l=10, r=10, t=90 if title else 20, b=10),
+        legend=dict(orientation="h", yanchor="bottom", y=1.0, xanchor="left", x=0),
         hovermode="x unified",
     )
     if ytitle:
@@ -216,11 +221,11 @@ def chain_diagram(nodes: list[dict]) -> go.Figure:
     n = len(nodes)
     per_row = 4
     fig = go.Figure()
-    w, h, gx, gy = 0.21, 0.34, 0.04, 0.12
+    w, h, gx, gy = 0.225, 0.34, 0.03, 0.12
     pos = []
     for i in range(n):
         r, c = divmod(i, per_row)
-        x0 = 0.01 + c * (w + gx)
+        x0 = 0.005 + c * (w + gx)
         y0 = 0.98 - (r + 1) * h - r * gy
         pos.append((x0, y0))
     for i, (nd, (x0, y0)) in enumerate(zip(nodes, pos, strict=True)):
@@ -243,8 +248,14 @@ def chain_diagram(nodes: list[dict]) -> go.Figure:
             yref="paper",
             showarrow=False,
             align="center",
-            text=f"<b>{nd['num'] + '. ' if nd.get('num') else ''}{nd['title']}</b><br>{nd.get('value', '')}<br><span style='font-size:11px'>{nd.get('detail', '')}</span>",
-            font=dict(size=13),
+            xanchor="center",
+            yanchor="middle",
+            text=(
+                f"<b>{'<br>'.join(textwrap.wrap((nd['num'] + '. ' if nd.get('num') else '') + nd['title'], 20))}</b>"
+                f"<br>{'<br>'.join(textwrap.wrap(str(nd.get('value', '')), 18))}"
+                f"<br><span style='font-size:10px'>{'<br>'.join(textwrap.wrap(str(nd.get('detail', '')), 24))}</span>"
+            ),
+            font=dict(size=11),
         )
         if i < n - 1:
             if (i + 1) % per_row:

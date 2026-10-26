@@ -76,6 +76,8 @@ def node(title, df, resp, cumulative, unit_txt, num, color, tmax=None, tunit="mo
     except KeyError:
         return {"num": num, "title": title, "value": "n/a", "detail": "", "color": color}
     sig = "" if s["significant_at_peak"] else " (not significant)"
+    if resp == "inr":  # USD/INR up = rupee weaker; say which way the estimate points
+        unit_txt = f"{unit_txt} ({'rupee weaker' if s['peak'] > 0 else 'rupee stronger'})"
     return {
         "num": num,
         "title": title,
@@ -95,7 +97,7 @@ nodes = [
         "color": V["oil"],
     },
     node("Trade balance", sb, "cab_gdp", False, "pp of GDP", "1", V["cab_gdp"], tunit="quarters"),
-    node("Exchange rate", sa, "inr", True, "% (rupee weaker)", "2", V["inr"]),
+    node("Exchange rate", sa, "inr", True, "%", "2", V["inr"]),
     node("Direct prices", sa, "cpi", True, "pp on price level", "3", V["cpi"], tmax=6),
     node("Second-round prices", sa, "cpi", True, "pp on price level", "4", V["cpi"]),
     node("Monetary policy", sa, "repo", True, "pp on repo", "5", V["repo"]),

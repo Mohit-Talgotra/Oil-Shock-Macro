@@ -76,6 +76,8 @@ class XGBQuantileForecaster(Forecaster):
         self.lags = lags or feature_lags(spec, cfg)
         self.seed = int(cfg["seed"] if seed is None else seed)
         self.models: dict[tuple[int, float], object] = {}
+        self.offsets: dict[tuple[int, float], float] = {}
+        self.calib_frac = float(cfg["forecast"]["xgb"].get("calibration_frac", 0.0))
         self.min_rows = 24
 
     def _fit(self, y: pd.Series, X: pd.DataFrame | None) -> XGBQuantileForecaster:
@@ -91,6 +93,7 @@ class XGBQuantileForecaster(Forecaster):
         self.F_last = F.iloc[[-1]].copy()
         self.train_sets: dict[int, tuple[pd.DataFrame, pd.Series]] = {}
         self.models.clear()
+        self.offsets.clear()
         for h in range(1, self.horizons + 1):
             tgt = target_values(z, h, self.spec.kind)
             fut = oil.rolling(h).sum().shift(-h)
@@ -101,18 +104,31 @@ class XGBQuantileForecaster(Forecaster):
             if len(Dtr) < self.min_rows:
                 raise ValueError(f"only {len(Dtr)} training rows at horizon {h}")
             self.train_sets[h] = (Dtr, ytr)
+            n_cal = int(round(self.calib_frac * len(Dtr)))
+            if n_cal < 8 or len(Dtr) - n_cal < self.min_rows:
+                n_cal = 0
             for q in self.quantiles:
-                m = xgb.XGBRegressor(
-                    objective="reg:quantileerror",
-                    quantile_alpha=float(q),
-                    tree_method="hist",
-                    n_jobs=1,
-                    random_state=self.seed,
-                    **self.params,
-                )
-                m.fit(Dtr, ytr)
-                self.models[(h, q)] = m
+                # Shallow-tree quantile fits are over-confident in sample, so the bands are too narrow.
+                # Calibrate each quantile on the most recent rows (time-ordered split): shift it by the
+                # q-quantile of the held-out residuals, then refit on all rows.
+                off = 0.0
+                if n_cal:
+                    m0 = self._make(xgb, q).fit(Dtr.iloc[:-n_cal], ytr.iloc[:-n_cal])
+                    resid = ytr.iloc[-n_cal:].to_numpy() - m0.predict(Dtr.iloc[-n_cal:])
+                    off = float(np.quantile(resid, q))
+                self.offsets[(h, q)] = off
+                self.models[(h, q)] = self._make(xgb, q).fit(Dtr, ytr)
         return self
+
+    def _make(self, xgb, q: float):
+        return xgb.XGBRegressor(
+            objective="reg:quantileerror",
+            quantile_alpha=float(q),
+            tree_method="hist",
+            n_jobs=1,
+            random_state=self.seed,
+            **self.params,
+        )
 
     def predict(self, h, X_future=None, quantiles=QUANTILES) -> pd.DataFrame:
         if h > self.horizons:
@@ -124,7 +140,9 @@ class XGBQuantileForecaster(Forecaster):
             row = self.F_last.copy()
             row[OIL_FUT] = cum_oil[j - 1]
             for k, q in enumerate(quantiles):
-                out[j - 1, k] = float(self.models[(j, q)].predict(row[self.feature_names])[0])
+                out[j - 1, k] = float(self.models[(j, q)].predict(row[self.feature_names])[0]) + self.offsets.get(
+                    (j, q), 0.0
+                )
         return quantile_frame(out, h)  # sorted per row: guards against quantile crossing
 
     def grid_forecast(
